@@ -1,7 +1,7 @@
 #!/bin/bash
 # SPDX-License-Identifier: Apache-2.0
 #
-# Copyright 2025 Gerald Venzl, Andres Almiray
+# Copyright 2026 Gerald Venzl, Andres Almiray, Martin Bach
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,28 +19,26 @@ set -e
 
 echo "::group::⬇️ Download SQLcl"
 
-# Download well-known latest version of SQLcl
 if [[ ${VERSION} == "latest" ]]; then
-  curl -s -o "sqlcl.zip" "https://download.oracle.com/otn_software/java/sqldeveloper/sqlcl-latest.zip"
+
+  # Download well-known latest version of SQLcl (default)
+  curl --fail --location --show-error --silent --retry 3 \
+    -o "sqlcl.zip" \
+    "https://download.oracle.com/otn_software/java/sqldeveloper/sqlcl-latest.zip"
+
+elif [[ "${VERSION}" =~ ^[0-9]{2}\.[0-9]+\.[0-9]+\.[0-9]{3}\.[0-9]{4}$ ]]; then
+
+  # Download a specific version, use the fully qualified release name like
+  # in homebrew
+  download_link="https://download.oracle.com/otn_software/java/sqldeveloper/sqlcl-${VERSION}.zip"
+  curl --fail --location --show-error --silent --retry 3 \
+    -o "sqlcl.zip" \
+    "${download_link}"
 else
-  # Version download page
-  download_page="https://www.oracle.com/sqlcl/download/sqlcl-downloads-${VERSION}.html"
-
-  # Check whether download page exists
-  http_code=$(curl -s -L -o /dev/null -w "%{http_code}" "${download_page}")
-
-  if [[ "${http_code}" != "200" ]]; then
-    echo "❌ SQLcl version '${VERSION}' could not be resolved."
-    echo "Make sure that the version exists!"
-    exit 1;
-  fi;
-
-  # Getting the download page based on the version
-  download_link=$(curl -L -s "${download_page}" | grep "https://download.oracle.com/otn_software/java/sqldeveloper/sqlcl-${VERSION}" | grep -oP 'href="\K[^"]+')
-
-  # Download SQLcl
-  curl -s -o "sqlcl.zip" "${download_link}"
-
+  # incorrect version specified
+  echo "❌ SQLcl version '${VERSION}' is not valid."
+  echo "Make sure that the version exists!"
+  exit 1;
 fi;
 
 echo "::endgroup::"
@@ -53,7 +51,7 @@ unzip -qo "sqlcl.zip"
 echo "SQLCL_HOME=${PWD}/sqlcl" >> "$GITHUB_ENV"
 
 # State version
-${PWD}/sqlcl/bin/sql -version
+"${PWD}/sqlcl/bin/sql" -version
 
 echo "${PWD}/sqlcl/bin" >> "$GITHUB_PATH"
 

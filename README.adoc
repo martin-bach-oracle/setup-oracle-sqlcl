@@ -35,7 +35,9 @@ Following inputs may be used as `step.with` keys:
 | setup-java-version |          | 21       | Automatically setup Oracle JDK with the chosen version. Set to `false` to skip it.
 |===
 
-NOTE: If you decide to skip the automatic Java setup then you'll be responsible for configuring Java with version `11` as a minimum.
+The action accepts `version: latest` to download Oracle's current SQLcl build, or a fully qualified release in the form `nn.n.n.nnn.nnnn`, such as `25.3.0.274.1210`.
+
+NOTE: If you decide to skip the automatic Java setup then you'll be responsible for configuring Java with version `11` as a minimum. Newer SQLcl releases require Java 17 and later.
 We recommend using link:https://github.com/actions/setup-java[actions/setup-java].
 
 == Usage
@@ -56,5 +58,4 @@ jobs:
 
 == Versions
 
-The full list of supported SQLcl versions can be found link:https://github.com/gvenzl/setup-oracle-sqlcl/blob/main/versions.txt[here].
-Use `version: latest` (default & recommended) to always pull the latest release of SQLcl or use an explicit version of SQLcl to pin it for reproducible builds.
+Use `version: latest` (default & recommended) to always pull the latest release of SQLcl or use an explicit version of SQLcl to pin it for reproducible builds. The latter is advisable especially when using the action in SQLcl project workflows to pin the SQLcl version to the one used in your configuration.

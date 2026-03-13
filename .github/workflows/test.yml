@@ -7,12 +7,27 @@ on:
 
 jobs:
   test:
-    name: 'Test ${{ matrix.os }}'
+    name: 'Test ${{ matrix.os }} / ${{ matrix.case.name }}'
     strategy:
       fail-fast: false
       matrix:
         os: [ ubuntu-latest, macos-latest, windows-latest ]
+        case:
+          - name: latest
+            version: latest
+            expected: ''
+          - name: pinned
+            version: 25.4.2.044.1837
+            expected: 25.4.2.044.1837
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v6
       - uses: ./
+        with:
+          version: ${{ matrix.case.version }}
+      - name: Assert SQLcl version
+        if: ${{ matrix.case.expected != '' }}
+        shell: bash
+        run: |
+          sql -version | tee version.txt
+          grep -F "${{ matrix.case.expected }}" version.txt
